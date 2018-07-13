@@ -19,6 +19,10 @@ void matrix_init_kb(void) {
 	// put your keyboard start-up code here
 	// runs once when the firmware starts up
 
+	// LED Pins _UNTESTED_
+	DDRB |= (1<<5);
+	DDRB |= (1<<6);
+
 	set_single_persistent_default_layer(0);
 	matrix_init_user();
 }

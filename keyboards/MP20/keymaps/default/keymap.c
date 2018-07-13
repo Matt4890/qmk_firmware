@@ -59,6 +59,12 @@ enum MP20_keycodes {
 #define _______ KC_TRNS
 #define ___X___ KC_NO
 
+// LED Controls
+#define workspace_led_on()  PORTB |= (1<<5)
+#define workspace_led_off() PORTB &= ~(1<<5)
+#define arrows_led_on()     PORTB |= (1<<6)
+#define arrows_led_off()    PORTB &= ~(1<<6)
+
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 /* Numpad
@@ -136,26 +142,36 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 };
 
 void dance_wrkspc_finished (qk_tap_dance_state_t *state, void *user_data) {
+
   if (state->count == 1) {
+
     layer_invert(_WRKSPC);
     layer_off(_ARROWS);
     layer_off(_MACROS);
+
   } else if (state->count == 2)  {
+
     layer_off(_WRKSPC);
     layer_off(_ARROWS);
     layer_invert(_MACROS);
+
   }
 }
 
 void dance_arrows_finished (qk_tap_dance_state_t *state, void *user_data) {
+
   if (state->count == 1) {
+
     layer_off(_WRKSPC);
     layer_invert(_ARROWS);
     layer_off(_MACROS);
+
   } else if (state->count == 2)  {
+
     layer_off(_WRKSPC);
     layer_off(_ARROWS);
     layer_invert(_MACROS);
+
   }
 }
 
@@ -165,10 +181,6 @@ qk_tap_dance_action_t tap_dance_actions[] = {
   [TD_ARROWS]  = ACTION_TAP_DANCE_FN_ADVANCED(NULL, dance_arrows_finished, NULL)
 
 };
-
-// uint32_t layer_state_set_user(uint32_t s) {
-//   return update_tri_layer_state(s, _WRKSPC, _ARROWS, _MACROS);
-// }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
@@ -186,5 +198,31 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   }
 
   return true;
+
+}
+
+// Will this work?
+uint32_t layer_state_set_user(uint32_t state) {
+
+  // Grab layer status
+  uint32_t layer = layer_state;
+
+  // Turn off all LEDs
+  workspace_led_off();
+  arrows_led_off();
+
+  // Turn on LEDs accordingly
+  if (layer & (1<<_WRKSPC)) {
+    workspace_led_on();
+  }
+  if (layer & (1<<_ARROWS)) {
+    arrows_led_on();
+  }
+  if (layer & (1<<_MACROS)) {
+    workspace_led_on();
+    arrows_led_on();
+  }
+
+  return state;
 
 }
